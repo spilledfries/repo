@@ -32,7 +32,7 @@ def test():
 
 root = tk.Tk()
 root.title("System Dashboard")
-root.geometry("400x400")
+root.geometry("500x500")
 
 title = tk.Label(root, text="Device Info", font=("Arial", 10))
 title.pack(pady=10)
