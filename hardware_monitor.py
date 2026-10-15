@@ -8,6 +8,7 @@ import subprocess
 import time
 import getpass
 import psutil
+import sys
 from datetime import timedelta
 
 console = Console()
@@ -163,60 +164,57 @@ def build_layout() -> Layout:
 def main() -> None:
     layout = build_layout()
     user   = getpass.getuser()
-
-    with Live(layout, refresh_per_second=1, screen=True):
-        while True:
-            layout["header"].update(
-                Panel(
-                    f"[bold white]⬡ Hardware Monitor[/bold white]  "
-                    f"[dim]user:[/dim] [cyan]{user}[/cyan]  "
-                    f"[dim]uptime:[/dim] [green]{get_uptime().strip()}[/green]",
-                    style="bold blue",
+    try:
+        with Live(layout, refresh_per_second=1, screen=True):
+            while True:
+                layout["header"].update(
+                    Panel(
+                        f"[bold white]⬡ Hardware Monitor[/bold white]  "
+                        f"[dim]user:[/dim] [cyan]{user}[/cyan]  "
+                        f"[dim]uptime:[/dim] [green]{get_uptime().strip()}[/green]",
+                        style="bold blue",
+                    )
                 )
-            )
-
-            layout["cpu"].update(
-                Panel(
-                    f"[bold]Temperatures[/bold]\n{get_cpu_temp()}\n\n"
-                    f"[bold]Usage[/bold]\n{get_cpu_usage()}",
-                    title="[bold yellow]CPU[/bold yellow]",
-                    border_style="yellow",
+                layout["cpu"].update(
+                    Panel(
+                        f"[bold]Temperatures[/bold]\n{get_cpu_temp()}\n\n"
+                        f"[bold]Usage[/bold]\n{get_cpu_usage()}",
+                        title="[bold yellow]CPU[/bold yellow]",
+                        border_style="yellow",
+                    )
                 )
-            )
-
-            layout["ram"].update(
-                Panel(
-                    get_ram(),
-                    title="[bold magenta]Memory[/bold magenta]",
-                    border_style="magenta",
+                layout["ram"].update(
+                    Panel(
+                        get_ram(),
+                        title="[bold magenta]Memory[/bold magenta]",
+                        border_style="magenta",
+                    )
                 )
-            )
-
-            layout["disk"].update(
-                Panel(
-                    get_disk(),
-                    title="[bold green]Disk[/bold green]",
-                    border_style="green",
+                layout["disk"].update(
+                    Panel(
+                        get_disk(),
+                        title="[bold green]Disk[/bold green]",
+                        border_style="green",
+                    )
                 )
-            )
-
-            layout["network"].update(
-                Panel(
-                    get_network(),
-                    title="[bold cyan]Network[/bold cyan]",
-                    border_style="cyan",
+                layout["network"].update(
+                    Panel(
+                        get_network(),
+                        title="[bold cyan]Network[/bold cyan]",
+                        border_style="cyan",
+                    )
                 )
-            )
-
-            layout["footer"].update(
-                Panel(
-                    "[dim]Refreshes every second  •  Press [bold]CTRL+C[/bold] to exit[/dim]",
-                    style="dim",
+                layout["footer"].update(
+                    Panel(
+                        "[dim]Refreshes every second  •  Press [bold]CTRL+C[/bold] to exit[/dim]",
+                        style="dim",
+                    )
                 )
-            )
-
-            time.sleep(1)
-
+                time.sleep(1)
+    except KeyboardInterrupt:
+        # Optional: clear the screen or print a message
+        console.clear()
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()
