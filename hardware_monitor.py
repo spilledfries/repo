@@ -105,6 +105,11 @@ def get_network() -> str:
     """Return IP addresses and live network send/receive rates."""
     global _prev_net, _prev_time
 
+    def format_rate(bytes_per_sec: float) -> str:
+        if abs(bytes_per_sec) >= 1024 * 1024:
+            return f"{bytes_per_sec / (1024 * 1024):>7.2f} MB/s"
+        return f"{bytes_per_sec / 1024:>7.2f} KB/s"
+
     # IP addresses
     ip_lines = []
     for iface, addrs in psutil.net_if_addrs().items():
@@ -124,17 +129,17 @@ def get_network() -> str:
                 if iface not in _prev_net:
                     continue
                 prev = _prev_net[iface]
-                tx_kbs = (cur.bytes_sent - prev.bytes_sent) / elapsed / 1024
-                rx_kbs = (cur.bytes_recv - prev.bytes_recv) / elapsed / 1024
-                if tx_kbs > 0.01 or rx_kbs > 0.01:
+                tx_bps = (cur.bytes_sent - prev.bytes_sent) / elapsed
+                rx_bps = (cur.bytes_recv - prev.bytes_recv) / elapsed
+                if tx_bps > 10 or rx_bps > 10:
                     rate_lines.append(
-                        f"  {iface:<12} ↑ {tx_kbs:>7.2f} KB/s  ↓ {rx_kbs:>7.2f} KB/s"
+                        f"  {iface:<12} ↑ {format_rate(tx_bps):>12}  ↓ {format_rate(rx_bps):>12}"
                     )
 
     _prev_net  = {iface: cnt for iface, cnt in counters.items()}
     _prev_time = now
 
-    ip_section   = "\n".join(ip_lines)   or "  No external IPs found"
+    ip_section   = "\n".join(ip_lines) or "  No external IPs found"
     rate_section = "\n".join(rate_lines) or "  (measuring…)"
     return f"[bold]IP Addresses[/bold]\n{ip_section}\n\n[bold]Throughput[/bold]\n{rate_section}"
 
